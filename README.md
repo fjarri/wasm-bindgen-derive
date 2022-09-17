@@ -1,6 +1,6 @@
 # Trait derivation macros for `wasm-bindgen`
 
-[![crate][rust-crate-image]][rust-crate-link] [![Docs][rust-docs-image]][rust-docs-link] ![License][rust-license-image] [![Build Status][rust-build-image]][rust-build-link] [![Coverage][rust-coverage-image]][rust-coverage-link]
+[![crate][rust-crate-image]][rust-crate-link] [![Docs][rust-docs-image]][rust-docs-link] ![License][rust-license-image] [![Build Status][rust-build-image]][rust-build-link]
 
 This crate contains a derivation macro for `TryFrom<&JsValue> for T`, where `T` is a type exported to JavaScript.
 See the documentation for usage examples.
