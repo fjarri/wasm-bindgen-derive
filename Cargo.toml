@@ -2,6 +2,12 @@
 name = "wasm-bindgen-derive"
 version = "0.1.0"
 edition = "2021"
+authors = ["Bogdan Opanchuk <bogdan@opanchuk.net>"]
+license = "MIT"
+description = "Trait derivation macros for wasm-bindgen"
+repository = "https://github.com/fjarri/wasm-bindgen-derive"
+readme = "README.md"
+categories = ["no-std", "wasm"]
 
 [lib]
 proc-macro = true
