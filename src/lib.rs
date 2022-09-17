@@ -33,7 +33,7 @@ extern "C" {
 }
 
 // Use this type in the function signature.
-pub fn foo(value: &OptionMyType) -> Result<usize, JsValue> {
+pub fn foo(value: &OptionMyType) -> Result<usize, Error> {
     let js_value: &JsValue = value.as_ref();
     let typed_value: Option<MyType> = if js_value.is_null() {
         None
@@ -42,6 +42,65 @@ pub fn foo(value: &OptionMyType) -> Result<usize, JsValue> {
     };
     // Use the typed value
     Ok(typed_value.map(|value| value.0).unwrap_or_default())
+}
+```
+
+## Vector arguments
+
+`wasm-bindgen` currently does not support vector arguments with elements having an exported type.
+See [this issue](https://github.com/rustwasm/wasm-bindgen/issues/111),
+which, although it is mainly about returning vectors, will probably allow taking vectors too
+when fixed.
+
+The workaround is similar to that for the optional arguments, with one step added,
+where we try to cast the [`JsValue`](`wasm_bindgen::JsValue`) into [`Array`](`js_sys::Array`).
+The following example also shows how to return an array with elements having an exported type.
+
+```
+extern crate alloc;
+use js_sys::Error;
+use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
+use wasm_bindgen_derive::TryFromJsValue;
+
+#[derive(TryFromJsValue)]
+#[wasm_bindgen]
+#[derive(Clone)]
+struct MyType(usize);
+
+// To have a correct typing annotation generated for TypeScript, declare a custom type.
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(typescript_type = "MyType[]")]
+    pub type MyTypeArray;
+}
+
+// Use this type in the function signature.
+pub fn foo(val: &MyTypeArray) -> Result<MyTypeArray, Error> {
+
+    // Unpack the array
+
+    let js_val: &JsValue = val.as_ref();
+    if !js_sys::Array::is_array(js_val) {
+        return Err(Error::new("The argument must be an array"));
+    }
+    let array = js_sys::Array::from(js_val);
+    let length: usize = array.length().try_into().map_err(|err| Error::new(&format!("{}", err)))?;
+    let mut typed_array = Vec::<MyType>::with_capacity(length);
+    for js in array.iter() {
+        let typed_elem = MyType::try_from(&js).map_err(|err| Error::new(&err))?;
+        typed_array.push(typed_elem);
+    }
+
+    // Now we have `typed_array: Vec<MyType>`.
+
+    // Return the array
+
+    Ok(typed_array
+        .into_iter()
+        .map(JsValue::from)
+        .collect::<js_sys::Array>()
+        .unchecked_into::<MyTypeArray>())
 }
 ```
 */
