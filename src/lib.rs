@@ -82,7 +82,6 @@ GitHub comments.
 */
 #[proc_macro_derive(TryFromJsValue)]
 pub fn derive_try_from_jsvalue(input: TokenStream) -> TokenStream {
-
     let input: DeriveInput = parse_macro_input!(input as DeriveInput);
 
     let name = input.ident;
@@ -151,7 +150,7 @@ pub fn derive_try_from_jsvalue(input: TokenStream) -> TokenStream {
 
         #[#wasm_bindgen_macro_invocaton]
         impl #name {
-            #[wasm_bindgen(js_name = "get_classname")]
+            #[wasm_bindgen(js_name = "__getClassname")]
             pub fn __js_get_classname(&self) -> String {
                 use ::alloc::borrow::ToOwned;
                 ::core::stringify!(#name).to_owned()
@@ -163,6 +162,7 @@ pub fn derive_try_from_jsvalue(input: TokenStream) -> TokenStream {
 
             fn try_from(js: &::wasm_bindgen::JsValue) -> Result<Self, Self::Error> {
                 use ::alloc::borrow::ToOwned;
+                use ::alloc::string::ToString;
                 use ::wasm_bindgen::JsCast;
                 use ::wasm_bindgen::convert::RefFromWasmAbi;
 
@@ -172,10 +172,20 @@ pub fn derive_try_from_jsvalue(input: TokenStream) -> TokenStream {
                     return Err(format!("Value supplied as {} is not an object", classname));
                 }
 
-                let get_classname = ::js_sys::Reflect::get(js, &::wasm_bindgen::JsValue::from("get_classname"))
-                    .map_err(|err| format!("no get_classname method specified for object, {:?}", err))?
+                let no_get_classname_msg = concat!(
+                    "no __getClassname method specified for object; ",
+                    "did you forget to derive TryFromJsObject for this type?");
+
+                let get_classname = ::js_sys::Reflect::get(js, &::wasm_bindgen::JsValue::from("__getClassname"))
+                    .or(Err(no_get_classname_msg.to_string()))?;
+
+                if get_classname.is_undefined() {
+                    return Err(no_get_classname_msg.to_string());
+                }
+
+                let get_classname = get_classname
                     .dyn_into::<::js_sys::Function>()
-                    .map_err(|err| format!("get_classname is not a function, {:?}", err))?;
+                    .map_err(|err| format!("__getClassname is not a function, {:?}", err))?;
 
                 let object_classname: String = ::js_sys::Reflect::apply(
                         &get_classname,
