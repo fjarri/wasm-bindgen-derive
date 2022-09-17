@@ -11,7 +11,7 @@ See the documentation for usage examples.
 [rust-docs-image]: https://docs.rs/wasm-bindgen-derive/badge.svg
 [rust-docs-link]: https://docs.rs/wasm-bindgen-derive/
 [rust-license-image]: https://img.shields.io/crates/l/wasm-bindgen-derive
-[rust-build-image]: https://github.com/fjarri/wasm-bindgen-derive/workflows/wasm-bindgen-derive/badge.svg?branch=master&event=push
-[rust-build-link]: https://github.com/fjarri/wasm-bindgen-derive/actions?query=workflow%3Awasm-bindgen-derive
+[rust-build-image]: https://github.com/fjarri/wasm-bindgen-derive/actions/workflows/ci.yml/badge.svg?branch=master
+[rust-build-link]: https://github.com/fjarri/wasm-bindgen-derive/actions/workflows/ci.yml
 [rust-coverage-image]: https://codecov.io/gh/fjarri/wasm-bindgen-derive/branch/master/graph/badge.svg
 [rust-coverage-link]: https://codecov.io/gh/fjarri/wasm-bindgen-derive
