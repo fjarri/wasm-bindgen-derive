@@ -235,8 +235,11 @@ pub fn derive_try_from_jsvalue(input: TokenStream) -> TokenStream {
                     "no __getClassname method specified for object; ",
                     "did you forget to derive TryFromJsObject for this type?");
 
-                let get_classname = ::js_sys::Reflect::get(js, &::wasm_bindgen::JsValue::from("__getClassname"))
-                    .or(Err(no_get_classname_msg.to_string()))?;
+                let get_classname = ::js_sys::Reflect::get(
+                    js,
+                    &::wasm_bindgen::JsValue::from("__getClassname"),
+                )
+                .or(Err(no_get_classname_msg.to_string()))?;
 
                 if get_classname.is_undefined() {
                     return Err(no_get_classname_msg.to_string());
