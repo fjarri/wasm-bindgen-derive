@@ -81,10 +81,9 @@ pub fn foo(val: &MyTypeArray) -> Result<MyTypeArray, Error> {
     // Unpack the array
 
     let js_val: &JsValue = val.as_ref();
-    if !js_sys::Array::is_array(js_val) {
-        return Err(Error::new("The argument must be an array"));
-    }
-    let array = js_sys::Array::from(js_val);
+    let array: &js_sys::Array = js_val
+        .dyn_ref()
+        .ok_or_else(|| Error::new("The argument must be an array"))?;
     let length: usize = array.length().try_into().map_err(|err| Error::new(&format!("{}", err)))?;
     let mut typed_array = Vec::<MyType>::with_capacity(length);
     for js in array.iter() {
