@@ -1,20 +1,5 @@
-[package]
-name = "wasm-bindgen-derive"
-version = "0.1.1"
-edition = "2021"
-authors = ["Bogdan Opanchuk <bogdan@opanchuk.net>"]
-license = "MIT"
-description = "Trait derivation macros for wasm-bindgen"
-repository = "https://github.com/fjarri/wasm-bindgen-derive"
-readme = "README.md"
-categories = ["no-std", "wasm"]
-
-[lib]
-proc-macro = true
-
-[dependencies]
-syn = "1.0"
-quote = "1.0"
-proc-macro2 = "1.0"
-wasm-bindgen = "0.2.79"
-js-sys = "0.3.51"
+[workspace]
+members=[
+    'wasm-bindgen-derive',
+    'tests'
+]

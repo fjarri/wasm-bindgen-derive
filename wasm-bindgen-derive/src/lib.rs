@@ -15,7 +15,7 @@ See [this issue](https://github.com/rustwasm/wasm-bindgen/issues/2370).
 ```
 extern crate alloc;
 use js_sys::Error;
-use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
+use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use wasm_bindgen_derive::TryFromJsValue;
 
 // Derive `TryFromJsValue` for the target structure (note that it has to come
@@ -33,15 +33,23 @@ extern "C" {
 }
 
 // Use this type in the function signature.
-pub fn foo(value: &OptionMyType) -> Result<usize, Error> {
+pub fn option_example(value: &OptionMyType) -> Result<OptionMyType, Error> {
     let js_value: &JsValue = value.as_ref();
     let typed_value: Option<MyType> = if js_value.is_null() {
         None
     } else {
         Some(MyType::try_from(js_value).map_err(|err| Error::new(&err))?)
     };
-    // Use the typed value
-    Ok(typed_value.map(|value| value.0).unwrap_or_default())
+
+    // Now we have `typed_value: Option<MyType>`.
+
+    // Return it
+    // Note that by default `JsValue::from(None)` creates a `JsValue::UNDEFINED`.
+    // We want it to be `null` (as we declared in the TS type).
+    Ok(typed_value
+        .map(JsValue::from)
+        .unwrap_or(JsValue::NULL)
+        .unchecked_into::<OptionMyType>())
 }
 ```
 
@@ -59,8 +67,7 @@ The following example also shows how to return an array with elements having an 
 ```
 extern crate alloc;
 use js_sys::Error;
-use wasm_bindgen::JsCast;
-use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
+use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use wasm_bindgen_derive::TryFromJsValue;
 
 #[derive(TryFromJsValue)]
@@ -76,7 +83,7 @@ extern "C" {
 }
 
 // Use this type in the function signature.
-pub fn foo(val: &MyTypeArray) -> Result<MyTypeArray, Error> {
+pub fn vec_example(val: &MyTypeArray) -> Result<MyTypeArray, Error> {
 
     // Unpack the array
 
@@ -258,7 +265,9 @@ pub fn derive_try_from_jsvalue(input: TokenStream) -> TokenStream {
                     .ok_or_else(|| "Failed to get classname".to_owned())?;
 
                 if object_classname.as_str() == classname {
-                    let ptr = ::js_sys::Reflect::get(js, &::wasm_bindgen::JsValue::from_str("ptr"))
+                    // Note: using an undocumented implementation detail of `wasm-bindgen`:
+                    // the pointer property has the name `__wbg_ptr` (since wasm-bindgen 0.2.85)
+                    let ptr = ::js_sys::Reflect::get(js, &::wasm_bindgen::JsValue::from_str("__wbg_ptr"))
                         .map_err(|err| format!("{:?}", err))?;
                     let ptr_u32: u32 = ptr.as_f64().ok_or(::wasm_bindgen::JsValue::NULL)
                         .map_err(|err| format!("{:?}", err))?
