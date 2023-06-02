@@ -3,3 +3,6 @@ members=[
     'wasm-bindgen-derive',
     'tests'
 ]
+
+[profile.release]
+opt-level = 1
