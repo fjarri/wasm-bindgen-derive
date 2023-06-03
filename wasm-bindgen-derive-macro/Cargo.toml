@@ -1,16 +1,22 @@
 [package]
-name = "wasm-bindgen-derive"
+name = "wasm-bindgen-derive-macro"
 version = "0.2.0"
 edition = "2021"
 authors = ["Bogdan Opanchuk <bogdan@opanchuk.net>"]
 license = "MIT"
-description = "Trait derivation macros for wasm-bindgen"
+description = "Proc-macro backend for wasm-bindgen-derive"
 repository = "https://github.com/fjarri/wasm-bindgen-derive"
-readme = "../README.md"
 categories = ["no-std", "wasm"]
 rust-version = "1.65.0"
 
+[lib]
+proc-macro = true
+
 [dependencies]
-wasm-bindgen-derive-macro = "0.2"
+syn = "1.0"
+quote = "1.0"
+proc-macro2 = "1.0"
+
+[dev-dependencies]
 wasm-bindgen = "0.2.85"
 js-sys = "0.3.55"
