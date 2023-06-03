@@ -9,7 +9,7 @@ where
     T: JsCast,
 {
     let js_val = match val {
-        None => JsValue::NULL,
+        None => JsValue::UNDEFINED,
         Some(val) => val.into(),
     };
     js_val.unchecked_into::<T>()
@@ -31,11 +31,11 @@ where
     for<'a> T: TryFrom<&'a JsValue>,
     for<'a> <T as TryFrom<&'a JsValue>>::Error: core::fmt::Debug,
 {
-    let val_js = val.into();
-    if val_js.is_null() {
+    let js_val = val.into();
+    if js_val.is_undefined() {
         return None;
     }
-    Some(T::try_from(&val_js).unwrap())
+    Some(T::try_from(&js_val).unwrap())
 }
 
 fn try_from_js_array<T>(val: impl Into<JsValue>) -> Vec<T>

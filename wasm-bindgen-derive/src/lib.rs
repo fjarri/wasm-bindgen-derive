@@ -28,14 +28,14 @@ struct MyType(usize);
 // To have a correct typing annotation generated for TypeScript, declare a custom type.
 #[wasm_bindgen]
 extern "C" {
-    #[wasm_bindgen(typescript_type = "MyType | null")]
+    #[wasm_bindgen(typescript_type = "MyType | undefined")]
     pub type OptionMyType;
 }
 
 // Use this type in the function signature.
 pub fn option_example(value: &OptionMyType) -> Result<OptionMyType, Error> {
     let js_value: &JsValue = value.as_ref();
-    let typed_value: Option<MyType> = if js_value.is_null() {
+    let typed_value: Option<MyType> = if js_value.is_undefined() {
         None
     } else {
         Some(MyType::try_from(js_value).map_err(|err| Error::new(&err))?)
@@ -45,11 +45,7 @@ pub fn option_example(value: &OptionMyType) -> Result<OptionMyType, Error> {
 
     // Return it
     // Note that by default `JsValue::from(None)` creates a `JsValue::UNDEFINED`.
-    // We want it to be `null` (as we declared in the TS type).
-    Ok(typed_value
-        .map(JsValue::from)
-        .unwrap_or(JsValue::NULL)
-        .unchecked_into::<OptionMyType>())
+    Ok(JsValue::from(typed_value).unchecked_into::<OptionMyType>())
 }
 ```
 
