@@ -92,8 +92,11 @@ pub fn derive_try_from_jsvalue(input: TokenStream) -> TokenStream {
         });
 
     let wasm_bindgen_macro_invocaton = match maybe_js_class {
-        Some(class) => format!("wasm_bindgen(js_class = \"{}\")", class),
-        None => "wasm_bindgen".to_string(),
+        Some(class) => format!(
+            "::wasm_bindgen::prelude::wasm_bindgen(js_class = \"{}\")",
+            class
+        ),
+        None => "::wasm_bindgen::prelude::wasm_bindgen".to_string(),
     }
     .parse::<TokenStream2>()
     .unwrap();
@@ -107,7 +110,7 @@ pub fn derive_try_from_jsvalue(input: TokenStream) -> TokenStream {
 
         #[#wasm_bindgen_macro_invocaton]
         impl #name {
-            #[wasm_bindgen(js_name = "__getClassname")]
+            #[::wasm_bindgen::prelude::wasm_bindgen(js_name = "__getClassname")]
             pub fn __js_get_classname(&self) -> String {
                 use ::alloc::borrow::ToOwned;
                 ::core::stringify!(#name).to_owned()
