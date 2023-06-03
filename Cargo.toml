@@ -1,5 +1,6 @@
 [workspace]
 members=[
+    'wasm-bindgen-derive-macro',
     'wasm-bindgen-derive',
     'tests'
 ]
