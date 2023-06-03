@@ -113,4 +113,7 @@ pub fn vec_example(val: &MyTypeArray) -> Result<MyTypeArray, Error> {
 #![doc(html_root_url = "https://docs.rs/wasm-bindgen-derive")]
 #![no_std]
 
+// Ensure it is present. Needed for the generated code to work.
+extern crate alloc;
+
 pub use wasm_bindgen_derive_macro::TryFromJsValue;
