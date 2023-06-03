@@ -1,6 +1,6 @@
 [package]
 name = "wasm-bindgen-derive"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 authors = ["Bogdan Opanchuk <bogdan@opanchuk.net>"]
 license = "MIT"
@@ -11,6 +11,6 @@ categories = ["no-std", "wasm"]
 rust-version = "1.65.0"
 
 [dependencies]
-wasm-bindgen-derive-macro = "0.2"
+wasm-bindgen-derive-macro = "0.2.1"
 wasm-bindgen = "0.2.85"
 js-sys = "0.3.55"
