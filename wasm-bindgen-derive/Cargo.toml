@@ -8,7 +8,7 @@ description = "Trait derivation macros for wasm-bindgen"
 repository = "https://github.com/fjarri/wasm-bindgen-derive"
 readme = "../README.md"
 categories = ["no-std", "wasm"]
-rust-version = "1.65.0"
+rust-version = "1.74.0"
 
 [dependencies]
 wasm-bindgen-derive-macro = "0.2.1"
