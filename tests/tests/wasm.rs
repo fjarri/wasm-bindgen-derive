@@ -1,7 +1,7 @@
 use wasm_bindgen_test::wasm_bindgen_test;
 
 use wasm_bindgen_derive::{into_js_array, into_js_option, try_from_js_array, try_from_js_option};
-use wasm_bindgen_derive_tests::{option_example, vec_example, MyType};
+use wasm_bindgen_derive_tests::{option_example, vec_example, vec_example_simplified, MyType};
 
 #[wasm_bindgen_test]
 fn test_option_example_some() {
@@ -30,5 +30,14 @@ fn test_vec_example() {
 
     let result_js = vec_example(&arg_js).unwrap();
     let result = try_from_js_array::<MyType>(result_js);
+    assert!(result == Ok(arg));
+}
+
+#[wasm_bindgen_test]
+fn test_vec_example_simplified() {
+    let arg = vec![MyType::new(0), MyType::new(1), MyType::new(2)];
+    let arg_js = into_js_array(arg.clone());
+
+    let result = vec_example_simplified(&arg_js);
     assert!(result == Ok(arg));
 }

@@ -4,12 +4,12 @@ that serves as a basis for workarounds for some lapses of functionality in
 [`wasm-bindgen`](https://crates.io/crates/wasm-bindgen).
 
 
-## Optional arguments
+## Optional arguments and return values
 
 `wasm-bindgen` supports method arguments of the form `Option<T>`,
 where `T` is an exported type, but it has an unexpected side effect on the JS side:
 the value passed to a method this way gets consumed (mimicking Rust semantics).
-See [this issue](https://github.com/rustwasm/wasm-bindgen/issues/2370).
+See [wasm-bindgen#2370](https://github.com/rustwasm/wasm-bindgen/issues/2370).
 `Option<&T>` is not currently supported, but an equivalent behavior can be implemented manually.
 
 ```
@@ -33,6 +33,7 @@ extern "C" {
 }
 
 // Use this type in the function signature.
+#[wasm_bindgen]
 pub fn option_example(value: &OptionMyType) -> Result<OptionMyType, Error> {
     // Use a helper to extract the typed value
     let typed_value = try_from_js_option::<MyType>(value).map_err(|err| Error::new(&err))?;
@@ -47,14 +48,12 @@ pub fn option_example(value: &OptionMyType) -> Result<OptionMyType, Error> {
 
 ## Vector arguments
 
-`wasm-bindgen` currently does not support vector arguments with elements having an exported type.
-See [this issue](https://github.com/rustwasm/wasm-bindgen/issues/111),
-which, although it is mainly about returning vectors, will probably allow taking vectors too
-when fixed.
-
-The workaround is similar to that for the optional arguments, with one step added,
-where we try to cast the [`JsValue`](`wasm_bindgen::JsValue`) into [`Array`](`js_sys::Array`).
-The following example also shows how to return an array with elements having an exported type.
+With the closing of [wasm-bindgen#111](https://github.com/rustwasm/wasm-bindgen/issues/111),
+it is now possible to return `Vec<MyType>` values.
+Having an argument of type `Vec<MyType>` compiles, but results in an unexpected behavior
+similar to that with `Option<MyType>`: all the elements of the input array
+(but not the array itself) are invalidated on the JS side.
+So this crate can still be used to take array arguments without invalidating them.
 
 ```
 extern crate alloc;
@@ -75,6 +74,7 @@ extern "C" {
 }
 
 // Use this type in the function signature.
+#[wasm_bindgen]
 pub fn vec_example(val: &MyTypeArray) -> Result<MyTypeArray, Error> {
     // Use a helper to extract the typed array
     let typed_array = try_from_js_array::<MyType>(val).map_err(|err| Error::new(&err))?;
@@ -83,6 +83,18 @@ pub fn vec_example(val: &MyTypeArray) -> Result<MyTypeArray, Error> {
 
     // Return the array
     Ok(into_js_array(typed_array))
+}
+
+// Post wasm-bindgen 0.2.91, we can just return a vector
+#[wasm_bindgen]
+pub fn vec_example_simplified(val: &MyTypeArray) -> Result<Vec<MyType>, Error> {
+    // Use a helper to extract the typed array
+    let typed_array = try_from_js_array::<MyType>(val).map_err(|err| Error::new(&err))?;
+
+    // Now we have `typed_array: Vec<MyType>`.
+
+    // Return the array
+    Ok(typed_array)
 }
 ```
 */

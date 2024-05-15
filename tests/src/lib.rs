@@ -31,6 +31,7 @@ extern "C" {
 }
 
 // Use this type in the function signature.
+#[wasm_bindgen]
 pub fn option_example(value: &OptionMyType) -> Result<OptionMyType, Error> {
     // Use a helper to extract the typed value
     let typed_value = try_from_js_option::<MyType>(value).map_err(|err| Error::new(&err))?;
@@ -53,6 +54,7 @@ extern "C" {
 }
 
 // Use this type in the function signature.
+#[wasm_bindgen]
 pub fn vec_example(val: &MyTypeArray) -> Result<MyTypeArray, Error> {
     // Use a helper to extract the typed array
     let typed_array = try_from_js_array::<MyType>(val).map_err(|err| Error::new(&err))?;
@@ -61,4 +63,16 @@ pub fn vec_example(val: &MyTypeArray) -> Result<MyTypeArray, Error> {
 
     // Return the array
     Ok(into_js_array(typed_array))
+}
+
+// Post wasm-bindgen 0.2.91, we can just return a vector
+#[wasm_bindgen]
+pub fn vec_example_simplified(val: &MyTypeArray) -> Result<Vec<MyType>, Error> {
+    // Use a helper to extract the typed array
+    let typed_array = try_from_js_array::<MyType>(val).map_err(|err| Error::new(&err))?;
+
+    // Now we have `typed_array: Vec<MyType>`.
+
+    // Return the array
+    Ok(typed_array)
 }
