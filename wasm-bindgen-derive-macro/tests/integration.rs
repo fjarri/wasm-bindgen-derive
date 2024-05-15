@@ -18,6 +18,8 @@ struct MyTypeCustomName(usize);
 
 #[test]
 fn pass() {
-    let _x = MyType(1);
-    let _y = MyTypeCustomName(2);
+    let x = MyType(1);
+    assert_eq!(x.0, 1);
+    let y = MyTypeCustomName(2);
+    assert_eq!(y.0, 2);
 }
