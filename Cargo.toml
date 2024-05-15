@@ -4,3 +4,4 @@ members=[
     'wasm-bindgen-derive',
     'tests'
 ]
+resolver = "2"
