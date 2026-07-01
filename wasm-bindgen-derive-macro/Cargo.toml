@@ -1,22 +1,22 @@
 [package]
 name = "wasm-bindgen-derive-macro"
 version = "0.3.0"
-edition = "2021"
+edition = "2024"
 authors = ["Bogdan Opanchuk <bogdan@opanchuk.net>"]
 license = "MIT"
 description = "Proc-macro backend for wasm-bindgen-derive"
 repository = "https://github.com/fjarri/wasm-bindgen-derive"
 categories = ["no-std", "wasm"]
-rust-version = "1.74.0"
+rust-version = "1.85.0"
 
 [lib]
 proc-macro = true
 
 [dependencies]
-syn = "1.0"
-quote = "1.0"
-proc-macro2 = "1.0"
+syn = "2"
+quote = "1"
+proc-macro2 = "1"
 
 [dev-dependencies]
-wasm-bindgen = "0.2.91"
+wasm-bindgen = "=0.2.89"
 js-sys = "0.3.55"

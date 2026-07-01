@@ -1,7 +1,7 @@
 use wasm_bindgen_test::wasm_bindgen_test;
 
 use wasm_bindgen_derive::{into_js_array, into_js_option, try_from_js_array, try_from_js_option};
-use wasm_bindgen_derive_tests::{option_example, vec_example, vec_example_simplified, MyType};
+use wasm_bindgen_derive_tests::{MyType, option_example, vec_example, vec_example_simplified};
 
 #[wasm_bindgen_test]
 fn test_option_example_some() {

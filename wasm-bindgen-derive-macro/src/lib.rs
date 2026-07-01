@@ -14,7 +14,7 @@ use alloc::string::ToString;
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput, Error};
+use syn::{Data, DeriveInput, Error, parse_macro_input};
 
 macro_rules! derive_error {
     ($string: tt) => {
@@ -49,47 +49,35 @@ pub fn derive_try_from_jsvalue(input: TokenStream) -> TokenStream {
         _ => return derive_error!("TryFromJsValue may only be derived on structs"),
     };
 
-    let wasm_bindgen_meta = input.attrs.iter().find_map(|attr| {
-        attr.parse_meta()
-            .ok()
-            .and_then(|meta| match meta.path().is_ident("wasm_bindgen") {
-                true => Some(meta),
-                false => None,
-            })
+    // Find the first occurrence of `#[wasm_bindgen]` or `#[wasm_bindgen(.. = ..)]
+    let wasm_bindgen_attr = input.attrs.iter().find(|attr| match &attr.meta {
+        syn::Meta::Path(path) => path.is_ident("wasm_bindgen"),
+        syn::Meta::List(list) => list.path.is_ident("wasm_bindgen"),
+        syn::Meta::NameValue(_) => false,
     });
-    if wasm_bindgen_meta.is_none() {
+
+    let Some(wasm_bindgen_attr) = wasm_bindgen_attr else {
         return derive_error!(
             "TryFromJsValue can be defined only on struct exported to wasm with #[wasm_bindgen]"
         );
-    }
+    };
 
-    let maybe_js_class = wasm_bindgen_meta
-        .and_then(|meta| match meta {
-            syn::Meta::List(list) => Some(list),
-            _ => None,
-        })
-        .and_then(|meta_list| {
-            meta_list.nested.iter().find_map(|nested_meta| {
-                let maybe_meta = match nested_meta {
-                    syn::NestedMeta::Meta(meta) => Some(meta),
-                    _ => None,
-                };
-
-                maybe_meta
-                    .and_then(|meta| match meta {
-                        syn::Meta::NameValue(name_value) => Some(name_value),
-                        _ => None,
-                    })
-                    .and_then(|name_value| match name_value.path.is_ident("js_name") {
-                        true => Some(name_value.lit.clone()),
-                        false => None,
-                    })
-                    .and_then(|lit| match lit {
-                        syn::Lit::Str(str) => Some(str.value()),
-                        _ => None,
-                    })
-            })
-        });
+    let maybe_js_class = if let syn::Meta::List(list) = &wasm_bindgen_attr.meta {
+        let mut js_name = None;
+        if let Err(err) = list.parse_nested_meta(|meta| {
+            if meta.path.is_ident("js_name") {
+                let value = meta.value()?;
+                let s: syn::LitStr = value.parse()?;
+                js_name = Some(s.value());
+            }
+            Ok(())
+        }) {
+            return err.into_compile_error().into();
+        }
+        js_name
+    } else {
+        None
+    };
 
     let wasm_bindgen_macro_invocaton = match maybe_js_class {
         Some(class) => format!(
