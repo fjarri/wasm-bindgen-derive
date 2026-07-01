@@ -21,4 +21,4 @@ proc-macro2 = "1"
 wasm-bindgen = { workspace = true }
 js-sys = { workspace = true }
 trybuild = "1"
-wasm-bindgen-derive = { workspace = true }
+wasm-bindgen-derive = { path = "../wasm-bindgen-derive" }

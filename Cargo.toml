@@ -17,6 +17,6 @@ rust-version = "1.85.0"
 js-sys = "0.3.97"
 wasm-bindgen = "0.2.120"
 
-# These must point to local crates between releases, and to crates.io when releases are published.
-wasm-bindgen-derive = { path = "./wasm-bindgen-derive" }
+# This must point to the local crate between releases,
+# and to crates.io when `wasm-bindgen-derive-macro` is  published.
 wasm-bindgen-derive-macro = { path = "./wasm-bindgen-derive-macro" }
