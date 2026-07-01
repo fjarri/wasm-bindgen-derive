@@ -1,9 +1,7 @@
-extern crate alloc;
-
 use js_sys::Error;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen_derive::{
-    into_js_array, into_js_option, try_from_js_array, try_from_js_option, TryFromJsValue,
+    TryFromJsValue, into_js_array, into_js_option, try_from_js_array, try_from_js_option,
 };
 
 // Derive `TryFromJsValue` for the target structure (note that it has to come

@@ -14,7 +14,7 @@ use alloc::string::ToString;
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput, Error};
+use syn::{Data, DeriveInput, Error, parse_macro_input};
 
 macro_rules! derive_error {
     ($string: tt) => {
@@ -29,7 +29,6 @@ macro_rules! derive_error {
 Note that:
 * this derivation must be be positioned before `#[wasm_bindgen]`;
 * the type must implement [`Clone`].
-* `extern crate alloc` must be declared in scope.
 
 The macro is authored by [**@AlexKorn**](https://github.com/AlexKorn)
 based on the idea of [**@aweinstock314**](https://github.com/aweinstock314).
@@ -49,47 +48,35 @@ pub fn derive_try_from_jsvalue(input: TokenStream) -> TokenStream {
         _ => return derive_error!("TryFromJsValue may only be derived on structs"),
     };
 
-    let wasm_bindgen_meta = input.attrs.iter().find_map(|attr| {
-        attr.parse_meta()
-            .ok()
-            .and_then(|meta| match meta.path().is_ident("wasm_bindgen") {
-                true => Some(meta),
-                false => None,
-            })
+    // Find the first occurrence of `#[wasm_bindgen]` or `#[wasm_bindgen(.. = ..)]
+    let wasm_bindgen_attr = input.attrs.iter().find(|attr| match &attr.meta {
+        syn::Meta::Path(path) => path.is_ident("wasm_bindgen"),
+        syn::Meta::List(list) => list.path.is_ident("wasm_bindgen"),
+        syn::Meta::NameValue(_) => false,
     });
-    if wasm_bindgen_meta.is_none() {
+
+    let Some(wasm_bindgen_attr) = wasm_bindgen_attr else {
         return derive_error!(
             "TryFromJsValue can be defined only on struct exported to wasm with #[wasm_bindgen]"
         );
-    }
+    };
 
-    let maybe_js_class = wasm_bindgen_meta
-        .and_then(|meta| match meta {
-            syn::Meta::List(list) => Some(list),
-            _ => None,
-        })
-        .and_then(|meta_list| {
-            meta_list.nested.iter().find_map(|nested_meta| {
-                let maybe_meta = match nested_meta {
-                    syn::NestedMeta::Meta(meta) => Some(meta),
-                    _ => None,
-                };
-
-                maybe_meta
-                    .and_then(|meta| match meta {
-                        syn::Meta::NameValue(name_value) => Some(name_value),
-                        _ => None,
-                    })
-                    .and_then(|name_value| match name_value.path.is_ident("js_name") {
-                        true => Some(name_value.lit.clone()),
-                        false => None,
-                    })
-                    .and_then(|lit| match lit {
-                        syn::Lit::Str(str) => Some(str.value()),
-                        _ => None,
-                    })
-            })
-        });
+    let maybe_js_class = if let syn::Meta::List(list) = &wasm_bindgen_attr.meta {
+        let mut js_name = None;
+        if let Err(err) = list.parse_nested_meta(|meta| {
+            if meta.path.is_ident("js_name") {
+                let value = meta.value()?;
+                let s: syn::LitStr = value.parse()?;
+                js_name = Some(s.value());
+            }
+            Ok(())
+        }) {
+            return err.into_compile_error().into();
+        }
+        js_name
+    } else {
+        None
+    };
 
     let wasm_bindgen_macro_invocaton = match maybe_js_class {
         Some(class) => format!(
@@ -101,6 +88,8 @@ pub fn derive_try_from_jsvalue(input: TokenStream) -> TokenStream {
     .parse::<TokenStream2>()
     .unwrap();
 
+    // Note that we use `::wasm_bindgen_derive` here,
+    // because this crate will only ever be imported via it.
     let expanded = quote! {
         impl #name {
             pub fn __get_classname() -> &'static str {
@@ -111,18 +100,17 @@ pub fn derive_try_from_jsvalue(input: TokenStream) -> TokenStream {
         #[#wasm_bindgen_macro_invocaton]
         impl #name {
             #[::wasm_bindgen::prelude::wasm_bindgen(js_name = "__getClassname")]
-            pub fn __js_get_classname(&self) -> String {
-                use ::alloc::borrow::ToOwned;
+            pub fn __js_get_classname(&self) -> ::wasm_bindgen_derive::alloc::string::String {
+                use ::wasm_bindgen_derive::alloc::borrow::ToOwned;
                 ::core::stringify!(#name).to_owned()
             }
         }
 
         impl ::core::convert::TryFrom<&::wasm_bindgen::JsValue> for #name {
-            type Error = String;
+            type Error = ::wasm_bindgen_derive::alloc::string::String;
 
             fn try_from(js: &::wasm_bindgen::JsValue) -> Result<Self, Self::Error> {
-                use ::alloc::borrow::ToOwned;
-                use ::alloc::string::ToString;
+                use ::wasm_bindgen_derive::alloc::{borrow::ToOwned, string::{String, ToString}, format};
                 use ::wasm_bindgen::JsCast;
                 use ::wasm_bindgen::convert::RefFromWasmAbi;
 
@@ -164,10 +152,13 @@ pub fn derive_try_from_jsvalue(input: TokenStream) -> TokenStream {
                     // the pointer property has the name `__wbg_ptr` (since wasm-bindgen 0.2.85)
                     let ptr = ::js_sys::Reflect::get(js, &::wasm_bindgen::JsValue::from_str("__wbg_ptr"))
                         .map_err(|err| format!("{:?}", err))?;
+                    // All numbers in JS are float64.
                     let ptr_u32: u32 = ptr.as_f64().ok_or(::wasm_bindgen::JsValue::NULL)
                         .map_err(|err| format!("{:?}", err))?
                         as u32;
-                    let instance_ref = unsafe { #name::ref_from_abi(ptr_u32) };
+                    let ptr_abi: ::wasm_bindgen::__rt::WasmPtr<::wasm_bindgen::__rt::WasmRefCell<#name>> =
+                        ::wasm_bindgen::__rt::WasmPtr::from_usize(ptr_u32 as usize);
+                    let instance_ref = unsafe { #name::ref_from_abi(ptr_abi) };
                     Ok(instance_ref.clone())
                 } else {
                     Err(format!("Cannot convert {} to {}", object_classname, classname))

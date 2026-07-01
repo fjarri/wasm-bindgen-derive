@@ -13,7 +13,6 @@ See [wasm-bindgen#2370](https://github.com/rustwasm/wasm-bindgen/issues/2370).
 `Option<&T>` is not currently supported, but an equivalent behavior can be implemented manually.
 
 ```
-extern crate alloc;
 use js_sys::Error;
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use wasm_bindgen_derive::{TryFromJsValue, try_from_js_option, into_js_option};
@@ -56,7 +55,6 @@ similar to that with `Option<MyType>`: all the elements of the input array
 So this crate can still be used to take array arguments without invalidating them.
 
 ```
-extern crate alloc;
 use js_sys::Error;
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use wasm_bindgen_derive::{TryFromJsValue, try_from_js_array, into_js_array};
@@ -101,8 +99,9 @@ pub fn vec_example_simplified(val: &MyTypeArray) -> Result<Vec<MyType>, Error> {
 #![doc(html_root_url = "https://docs.rs/wasm-bindgen-derive")]
 #![no_std]
 
-// Ensure it is present. Needed for the generated code to work.
-extern crate alloc;
+// Needed for the generated code to work.
+/// Re-exported standard library `alloc` to use in the generated code.
+pub extern crate alloc;
 
 mod helpers;
 

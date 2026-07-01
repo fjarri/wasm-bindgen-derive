@@ -21,27 +21,22 @@ jobs:
   clippy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions-rs/toolchain@v1
+    - uses: actions/checkout@v7
+    - uses: actions-rust-lang/setup-rust-toolchain@v1
       with:
         toolchain: stable
         components: clippy
         override: true
-        profile: minimal
     - run: cargo clippy --all --all-features --tests -- -D warnings
 
   rustfmt:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout sources
-        uses: actions/checkout@v1
-
-      - name: Install stable toolchain
-        uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
           components: rustfmt
-          profile: minimal
           override: true
 
       - name: Run cargo fmt
@@ -56,15 +51,14 @@ jobs:
       matrix:
         include:
           - target: x86_64-unknown-linux-gnu
-            rust: 1.74.0 # MSRV
+            rust: 1.85.0 # MSRV
           - target: x86_64-unknown-linux-gnu
             rust: stable
 
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          profile: minimal
           toolchain: ${{ matrix.rust }}
           target: ${{ matrix.target }}
           override: true
@@ -77,16 +71,15 @@ jobs:
     strategy:
       matrix:
         rust:
-          - 1.74.0 # MSRV
+          - 1.91.0 # (above MSRV because of wasm-pack requiements)
           - stable
         target:
           - wasm32-unknown-unknown
 
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          profile: minimal
           toolchain: ${{ matrix.rust }}
           target: ${{ matrix.target }}
           override: true
@@ -96,10 +89,9 @@ jobs:
   codecov:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          profile: minimal
           toolchain: stable
           target: x86_64-unknown-linux-gnu
           override: true
@@ -108,7 +100,7 @@ jobs:
       - name: Generate code coverage
         run: cargo llvm-cov --workspace --lcov --output-path lcov.info --all-features
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4.0.1
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: lcov.info
