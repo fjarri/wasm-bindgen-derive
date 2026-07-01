@@ -19,4 +19,4 @@ wasm-bindgen = "0.2.120"
 
 # This must point to the local crate between releases,
 # and to crates.io when `wasm-bindgen-derive-macro` is  published.
-wasm-bindgen-derive-macro = { path = "./wasm-bindgen-derive-macro" }
+wasm-bindgen-derive-macro = "0.4"
