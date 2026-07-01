@@ -1,5 +1,4 @@
-extern crate alloc;
-use wasm_bindgen_derive_macro::TryFromJsValue;
+use wasm_bindgen_derive::TryFromJsValue;
 
 #[derive(TryFromJsValue)]
 // error: missing `#[wasm_bindgen]` annotation

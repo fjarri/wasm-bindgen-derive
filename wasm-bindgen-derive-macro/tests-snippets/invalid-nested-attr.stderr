@@ -1,5 +1,5 @@
 error: expected `=`
- --> tests-snippets/invalid-nested-attr.rs:6:24
+ --> tests-snippets/invalid-nested-attr.rs:5:24
   |
-6 | #[wasm_bindgen(js_name "SomeJsName")] // nested attributes parsing will fail here
+5 | #[wasm_bindgen(js_name "SomeJsName")] // nested attributes parsing will fail here
   |                        ^^^^^^^^^^^^

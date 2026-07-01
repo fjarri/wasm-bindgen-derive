@@ -8,7 +8,7 @@ repository.workspace = true
 rust-version.workspace = true
 
 [dependencies]
-wasm-bindgen-derive = { path = "../wasm-bindgen-derive" }
+wasm-bindgen-derive = { workspace = true }
 wasm-bindgen = { workspace = true }
 js-sys = { workspace = true }
 

@@ -1,5 +1,3 @@
-extern crate alloc;
-
 use js_sys::Error;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen_derive::{

@@ -29,7 +29,6 @@ macro_rules! derive_error {
 Note that:
 * this derivation must be be positioned before `#[wasm_bindgen]`;
 * the type must implement [`Clone`].
-* `extern crate alloc` must be declared in scope.
 
 The macro is authored by [**@AlexKorn**](https://github.com/AlexKorn)
 based on the idea of [**@aweinstock314**](https://github.com/aweinstock314).
@@ -89,6 +88,8 @@ pub fn derive_try_from_jsvalue(input: TokenStream) -> TokenStream {
     .parse::<TokenStream2>()
     .unwrap();
 
+    // Note that we use `::wasm_bindgen_derive` here,
+    // because this crate will only ever be imported via it.
     let expanded = quote! {
         impl #name {
             pub fn __get_classname() -> &'static str {
@@ -99,18 +100,17 @@ pub fn derive_try_from_jsvalue(input: TokenStream) -> TokenStream {
         #[#wasm_bindgen_macro_invocaton]
         impl #name {
             #[::wasm_bindgen::prelude::wasm_bindgen(js_name = "__getClassname")]
-            pub fn __js_get_classname(&self) -> String {
-                use ::alloc::borrow::ToOwned;
+            pub fn __js_get_classname(&self) -> ::wasm_bindgen_derive::alloc::string::String {
+                use ::wasm_bindgen_derive::alloc::borrow::ToOwned;
                 ::core::stringify!(#name).to_owned()
             }
         }
 
         impl ::core::convert::TryFrom<&::wasm_bindgen::JsValue> for #name {
-            type Error = String;
+            type Error = ::wasm_bindgen_derive::alloc::string::String;
 
             fn try_from(js: &::wasm_bindgen::JsValue) -> Result<Self, Self::Error> {
-                use ::alloc::borrow::ToOwned;
-                use ::alloc::string::ToString;
+                use ::wasm_bindgen_derive::alloc::{borrow::ToOwned, string::{String, ToString}, format};
                 use ::wasm_bindgen::JsCast;
                 use ::wasm_bindgen::convert::RefFromWasmAbi;
 

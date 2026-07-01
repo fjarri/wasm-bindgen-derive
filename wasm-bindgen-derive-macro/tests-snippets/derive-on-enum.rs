@@ -1,6 +1,5 @@
-extern crate alloc;
 use wasm_bindgen::prelude::wasm_bindgen;
-use wasm_bindgen_derive_macro::TryFromJsValue;
+use wasm_bindgen_derive::TryFromJsValue;
 
 #[derive(TryFromJsValue)] // error: can only be derived for structs
 #[wasm_bindgen]
