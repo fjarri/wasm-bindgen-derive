@@ -152,10 +152,13 @@ pub fn derive_try_from_jsvalue(input: TokenStream) -> TokenStream {
                     // the pointer property has the name `__wbg_ptr` (since wasm-bindgen 0.2.85)
                     let ptr = ::js_sys::Reflect::get(js, &::wasm_bindgen::JsValue::from_str("__wbg_ptr"))
                         .map_err(|err| format!("{:?}", err))?;
+                    // All numbers in JS are float64.
                     let ptr_u32: u32 = ptr.as_f64().ok_or(::wasm_bindgen::JsValue::NULL)
                         .map_err(|err| format!("{:?}", err))?
                         as u32;
-                    let instance_ref = unsafe { #name::ref_from_abi(ptr_u32) };
+                    let ptr_abi: ::wasm_bindgen::__rt::WasmPtr<::wasm_bindgen::__rt::WasmRefCell<#name>> =
+                        ::wasm_bindgen::__rt::WasmPtr::from_usize(ptr_u32 as usize);
+                    let instance_ref = unsafe { #name::ref_from_abi(ptr_abi) };
                     Ok(instance_ref.clone())
                 } else {
                     Err(format!("Cannot convert {} to {}", object_classname, classname))

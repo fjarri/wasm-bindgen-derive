@@ -13,4 +13,4 @@ wasm-bindgen = { workspace = true }
 js-sys = { workspace = true }
 
 [dev-dependencies]
-wasm-bindgen-test = "0.3.28"
+wasm-bindgen-test = "0.3.70"
