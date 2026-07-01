@@ -5,3 +5,14 @@ members=[
     'tests'
 ]
 resolver = "2"
+
+[workspace.package]
+edition = "2024"
+authors = ["Bogdan Opanchuk <bogdan@opanchuk.net>"]
+license = "MIT"
+repository = "https://github.com/fjarri/wasm-bindgen-derive"
+rust-version = "1.85.0"
+
+[workspace.dependencies]
+js-sys = "0.3.55"
+wasm-bindgen = "=0.2.89"

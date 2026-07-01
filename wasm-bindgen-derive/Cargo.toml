@@ -1,16 +1,16 @@
 [package]
 name = "wasm-bindgen-derive"
 version = "0.3.0"
-edition = "2024"
-authors = ["Bogdan Opanchuk <bogdan@opanchuk.net>"]
-license = "MIT"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
 description = "Trait derivation macros for wasm-bindgen"
-repository = "https://github.com/fjarri/wasm-bindgen-derive"
 readme = "../README.md"
 categories = ["no-std", "wasm"]
-rust-version = "1.85.0"
 
 [dependencies]
 wasm-bindgen-derive-macro = { path = "../wasm-bindgen-derive-macro" }
-wasm-bindgen = "=0.2.89"
-js-sys = "0.3.55"
+wasm-bindgen = { workspace = true }
+js-sys = { workspace = true }
