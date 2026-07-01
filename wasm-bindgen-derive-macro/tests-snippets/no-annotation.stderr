@@ -1,0 +1,7 @@
+error: TryFromJsValue can be defined only on struct exported to wasm with #[wasm_bindgen]
+ --> tests-snippets/no-annotation.rs:4:10
+  |
+4 | #[derive(TryFromJsValue)]
+  |          ^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the derive macro `TryFromJsValue` (in Nightly builds, run with -Z macro-backtrace for more info)
